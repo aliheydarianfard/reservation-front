@@ -38,7 +38,7 @@ jobs:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASS }}
-        source: dist/timedari-frontend/browser/
+        source: dist/timedari-frontend/browser/*
         target: /var/www/timedari.ir/
 
     - name: Finalize deployment (rename + permissions + restart)
@@ -48,7 +48,9 @@ jobs:
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASS }}
         script: |
-          sudo mv -f /var/www/timedari.ir/index.csr.html /var/www/timedari.ir/index.html
+          if [ -f /var/www/timedari.ir/index.csr.html ]; then
+            sudo mv -f /var/www/timedari.ir/index.csr.html /var/www/timedari.ir/index.html
+          fi
           sudo chown -R www-data:www-data /var/www/timedari.ir
           sudo chmod -R 755 /var/www/timedari.ir
           sudo systemctl restart nginx
