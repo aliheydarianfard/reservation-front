@@ -41,7 +41,7 @@ jobs:
         source: dist/timedari-frontend/browser/*
         target: /var/www/timedari.ir/
 
-    - name: Finalize deployment (rename + permissions + restart)
+    - name: Finalize deployment
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.VPS_HOST }}
