@@ -1,5 +1,3 @@
-# .github/workflows/deploy-angular.yml
-
 name: Build and Deploy Angular to VPS
 
 on:
@@ -31,14 +29,17 @@ jobs:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASS }}
-        source: dist/timedari-frontend/
-        target: /var/www/timedari.ir
+        source: dist/timedari-frontend/browser/
+        target: /var/www/timedari.ir/
 
-    - name: Restart Nginx (optional)
+    - name: Finalize deployment (rename + permissions + restart)
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASS }}
         script: |
+          sudo mv -f /var/www/timedari.ir/index.csr.html /var/www/timedari.ir/index.html
+          sudo chown -R www-data:www-data /var/www/timedari.ir
+          sudo chmod -R 755 /var/www/timedari.ir
           sudo systemctl restart nginx
