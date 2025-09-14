@@ -80,3 +80,5 @@ jobs:
           sudo chown -R www-data:www-data /var/www/dev-timedari-frontend/browser
           sudo chmod -R 755 /var/www/dev-timedari-frontend/browser
           sudo systemctl restart nginx
+ 
+ 
