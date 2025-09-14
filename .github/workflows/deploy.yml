@@ -20,8 +20,10 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Build Angular app (Production)
-      run: npm run build -- --configuration=production --output-path=dist/browser --no-prerender
+    - name: Build Angular app
+      run: |
+        # پاک کردن فولدر قبلی و build مستقیم داخل dist/browser
+        npm run build -- --configuration=production --output-path=dist/browser --delete-output-path --no-prerender
 
     - name: Deploy built files to VPS
       uses: appleboy/scp-action@master
