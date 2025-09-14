@@ -40,7 +40,7 @@ jobs:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASS }}
-        source: dist_nasb/*
+        source: dist_nasb/browser/*
         target: /var/www/timedari.ir/browser/
 
     - name: Set permissions and restart Nginx
