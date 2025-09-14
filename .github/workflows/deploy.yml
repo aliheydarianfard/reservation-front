@@ -22,8 +22,17 @@ jobs:
 
     - name: Build Angular app
       run: |
-        # پاک کردن فولدر قبلی و build مستقیم داخل dist/browser
-        npm run build -- --configuration=production --output-path=dist/browser --delete-output-path --no-prerender
+        # Build مستقیم داخل dist_nasb
+        npm run build -- --configuration=production --output-path=dist_nasb --delete-output-path --no-prerender
+
+    - name: Clean target folder on VPS
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        password: ${{ secrets.VPS_PASS }}
+        script: |
+          sudo rm -rf /var/www/timedari.ir/browser/*
 
     - name: Deploy built files to VPS
       uses: appleboy/scp-action@master
@@ -31,7 +40,7 @@ jobs:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASS }}
-        source: dist/browser/*
+        source: dist_nasb/*
         target: /var/www/timedari.ir/browser/
 
     - name: Set permissions and restart Nginx
