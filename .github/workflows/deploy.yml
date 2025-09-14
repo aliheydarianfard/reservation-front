@@ -42,7 +42,8 @@ jobs:
           sudo chown -R www-data:www-data /var/www/timedari.ir/dist/timedari-frontend/browser
           sudo chmod -R 755 /var/www/timedari.ir/dist/timedari-frontend/browser
           sudo systemctl restart nginx
-
+ 
+ 
   deploy-dev:
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
