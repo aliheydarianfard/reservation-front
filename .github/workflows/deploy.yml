@@ -2,12 +2,12 @@ name: Build and Deploy Angular to VPS
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
-  deploy-prod:
-    if: github.ref == 'refs/heads/main'
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -20,10 +20,10 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Build Angular app (Production)
+    - name: Build Angular app
       run: npm run build -- --configuration=production --no-prerender
 
-    - name: Deploy to VPS (Production)
+    - name: Deploy built files to VPS
       uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.VPS_HOST }}
@@ -42,43 +42,3 @@ jobs:
           sudo chown -R www-data:www-data /var/www/timedari.ir/dist/timedari-frontend/browser
           sudo chmod -R 755 /var/www/timedari.ir/dist/timedari-frontend/browser
           sudo systemctl restart nginx
-
-  deploy-dev:
-    if: github.ref == 'refs/heads/develop'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-
-    - name: Install dependencies
-      run: npm install
-
-    - name: Build Angular app (Development)
-      run: npm run build -- --configuration=development --no-prerender
-
-    - name: Deploy to VPS (Development)
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        password: ${{ secrets.VPS_PASS }}
-        source: dist/timedari-frontend/browser/*
-        target: /var/www/dev-timedari-frontend/browser/
-
-    - name: Set permissions and restart Nginx
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        password: ${{ secrets.VPS_PASS }}
-        script: |
-          sudo chown -R www-data:www-data /var/www/dev-timedari-frontend/browser
-          sudo chmod -R 755 /var/www/dev-timedari-frontend/browser
-          sudo systemctl restart nginx
- 
- 
