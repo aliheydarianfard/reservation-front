@@ -28,13 +28,14 @@ jobs:
           npm run build -- --configuration=development --no-prerender
         fi
 
-    - name: Deploy to VPS
+    - name: Deploy built files to VPS
       uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASS }}
-        source: dist/timedari-frontend/browser/*
+        # مسیر دقیق browser نهایی داخل dist
+        source: dist/timedari-frontend/browser/timedari-frontend/browser/*
         target: ${{ github.ref == 'refs/heads/main' && '/var/www/timedari.ir/browser' || '/var/www/dev-timedari-frontend/browser' }}
 
     - name: Set permissions and restart Nginx
