@@ -32,6 +32,10 @@ jobs:
           npm run build -- --configuration=development --output-path=dist_nasb --delete-output-path --no-prerender
         fi
 
+    # -------------------- Check build output --------------------
+    - name: Check build output
+      run: ls -R dist_nasb
+
     # -------------------- Clean old folder on VPS --------------------
     - name: Clean target folder on VPS
       uses: appleboy/ssh-action@master
@@ -53,13 +57,11 @@ jobs:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASS }}
-        source: |
-          dist_nasb/browser/*
-          dist_nasb/server/*
+        source: dist_nasb/
         target: ${{ github.ref == 'refs/heads/main' && '/var/www/timedari.ir/ssr' || '/var/www/dev-timedari-frontend/ssr' }}
 
-    # -------------------- Set permissions --------------------
-    - name: Set permissions on VPS
+    # -------------------- Set permissions on VPS --------------------
+    - name: Set permissions
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.VPS_HOST }}
