@@ -1,0 +1,71 @@
+name: Build and Deploy Angular to VPS
+
+on:
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build Angular app
+      run: |
+        if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          npm run build -- --configuration=production --output-path=dist_nasb --delete-output-path --no-prerender
+        else
+          npm run build -- --configuration=development --output-path=dist_nasb --delete-output-path --no-prerender
+        fi
+
+    - name: Clean target folder on VPS
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        password: ${{ secrets.VPS_PASS }}
+        script: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            sudo rm -rf /var/www/timedari.ir/browser/dist_nasb
+          else
+            sudo rm -rf /var/www/dev-timedari-frontend/browser/dist_nasb
+          fi
+
+
+    - name: Deploy built files to VPS
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        password: ${{ secrets.VPS_PASS }}
+        source: |
+          dist_nasb/browser/*
+          dist_nasb/server/*
+        target: ${{ github.ref == 'refs/heads/main' && '/var/www/timedari.ir/ssr' || '/var/www/dev-timedari-frontend/ssr' }}
+
+
+    - name: Set permissions and restart Nginx
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        password: ${{ secrets.VPS_PASS }}
+        script: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            TARGET=/var/www/timedari.ir/browser
+          else
+            TARGET=/var/www/dev-timedari-frontend/browser
+          fi
+          sudo chown -R www-data:www-data $TARGET
+          sudo chmod -R 755 $TARGET
+          sudo systemctl restart nginx
