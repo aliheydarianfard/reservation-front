@@ -109,35 +109,41 @@ jobs:
           sudo chown -R www-data:www-data $APP_DIR
           sudo chmod -R 755 $APP_DIR
           
-          # راه‌اندازی برنامه - استفاده از روش ساده‌تر
+          # راه‌اندازی برنامه - روش ساده و ایمن
           echo "Starting application..."
           
-          # متوقف کردن سرور قبلی (با احتیاط)
-          PID=$(ps aux | grep "[n]ode server/server.mjs" | awk '{print $2}')
-          if [ ! -z "$PID" ]; then
-            echo "Stopping existing server with PID: $PID"
-            kill $PID
+          # فقط سرورهای مربوط به این مسیر خاص را متوقف کنیم
+          SERVER_PIDS=$(ps aux | grep "node.*server/server.mjs" | grep -v grep | awk '{print $2}')
+          if [ ! -z "$SERVER_PIDS" ]; then
+            echo "Stopping existing server(s) with PIDs: $SERVER_PIDS"
+            for pid in $SERVER_PIDS; do
+              kill $pid 2>/dev/null || true
+            done
             sleep 2
           fi
           
           # راه اندازی سرور
           nohup node server/server.mjs > /var/log/nodejs.log 2>&1 &
+          SERVER_PID=$!
+          echo "Server started with PID: $SERVER_PID"
           
           # صبر کردن تا سرور کامل بالا بیاید
-          sleep 5
+          sleep 8
           
           # تست connection
           echo "Testing connection..."
-          if curl -s --retry 3 --retry-delay 2 http://localhost:4000 > /dev/null; then
+          if curl -s --retry 3 --retry-delay 3 http://localhost:4000 > /dev/null; then
             echo "✅ Server is running successfully!"
+            echo "Deployment completed successfully!"
           else
             echo "❌ Server failed to start. Check /var/log/nodejs.log for details."
-            # تلاش مجدد با PM2 اگر nohup کار نکرد
+            echo "Trying alternative method with PM2..."
+            
+            # استفاده از PM2 به عنوان fallback
             npm install -g pm2
             pm2 delete $APP_NAME 2>/dev/null || true
             pm2 start server/server.mjs --name $APP_NAME --cwd $APP_DIR --time
             pm2 save
             echo "Fallback to PM2 completed."
+            echo "Deployment completed with fallback!"
           fi
-          
-          echo "Deployment completed successfully!"
