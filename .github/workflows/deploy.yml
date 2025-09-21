@@ -94,6 +94,11 @@ jobs:
             APP_NAME=dev-timedari-ssr
           fi
           cd $APP_DIR
+          # Install dependencies if node_modules missing
+          if [ ! -d "node_modules" ]; then
+            npm install
+          fi
+          # Restart or start with PM2
           if pm2 list | grep -q $APP_NAME; then
             pm2 restart $APP_NAME
           else
