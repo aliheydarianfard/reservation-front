@@ -1,4 +1,4 @@
-name: Build and Deploy Angular to VPS
+name: Build and Deploy Angular SSR to VPS
 
 on:
   push:
@@ -9,17 +9,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # -------------------- Checkout --------------------
     - name: Checkout code
       uses: actions/checkout@v3
 
+    # -------------------- Setup Node --------------------
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '20.x'
 
+    # -------------------- Install Dependencies --------------------
     - name: Install dependencies
       run: npm install
 
+    # -------------------- Build Angular SSR --------------------
     - name: Build Angular app
       run: |
         if [ "${{ github.ref }}" == "refs/heads/main" ]; then
@@ -28,6 +32,7 @@ jobs:
           npm run build -- --configuration=development --output-path=dist_nasb --delete-output-path --no-prerender
         fi
 
+    # -------------------- Clean old folder on VPS --------------------
     - name: Clean target folder on VPS
       uses: appleboy/ssh-action@master
       with:
@@ -36,12 +41,12 @@ jobs:
         password: ${{ secrets.VPS_PASS }}
         script: |
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            sudo rm -rf /var/www/timedari.ir/browser/dist_nasb
+            sudo rm -rf /var/www/timedari.ir/ssr
           else
-            sudo rm -rf /var/www/dev-timedari-frontend/browser/dist_nasb
+            sudo rm -rf /var/www/dev-timedari-frontend/ssr
           fi
 
-
+    # -------------------- Deploy built files to VPS --------------------
     - name: Deploy built files to VPS
       uses: appleboy/scp-action@master
       with:
@@ -53,8 +58,8 @@ jobs:
           dist_nasb/server/*
         target: ${{ github.ref == 'refs/heads/main' && '/var/www/timedari.ir/ssr' || '/var/www/dev-timedari-frontend/ssr' }}
 
-
-    - name: Set permissions and restart Nginx
+    # -------------------- Set permissions --------------------
+    - name: Set permissions on VPS
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.VPS_HOST }}
@@ -62,10 +67,34 @@ jobs:
         password: ${{ secrets.VPS_PASS }}
         script: |
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            TARGET=/var/www/timedari.ir/browser
+            TARGET=/var/www/timedari.ir/ssr
+            APP_NAME=timedari-ssr
           else
-            TARGET=/var/www/dev-timedari-frontend/browser
+            TARGET=/var/www/dev-timedari-frontend/ssr
+            APP_NAME=dev-timedari-ssr
           fi
           sudo chown -R www-data:www-data $TARGET
           sudo chmod -R 755 $TARGET
-          sudo systemctl restart nginx
+
+    # -------------------- Restart SSR with PM2 --------------------
+    - name: Restart SSR with PM2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        password: ${{ secrets.VPS_PASS }}
+        script: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            APP_DIR=/var/www/timedari.ir/ssr
+            APP_NAME=timedari-ssr
+          else
+            APP_DIR=/var/www/dev-timedari-frontend/ssr
+            APP_NAME=dev-timedari-ssr
+          fi
+          cd $APP_DIR
+          if pm2 list | grep -q $APP_NAME; then
+            pm2 restart $APP_NAME
+          else
+            pm2 start server/main.server.mjs --name $APP_NAME
+          fi
+          pm2 save
