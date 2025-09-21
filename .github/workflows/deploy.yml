@@ -27,28 +27,14 @@ jobs:
     - name: Build Angular app
       run: |
         if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-          npm run build -- --configuration=production --output-path=dist_nasb --delete-output-path --no-prerender
+          npm run build -- --configuration=production --output-path=dist_nasb --delete-output-path
         else
-          npm run build -- --configuration=development --output-path=dist_nasb --delete-output-path --no-prerender
+          npm run build -- --configuration=development --output-path=dist_nasb --delete-output-path
         fi
 
     # -------------------- Check build output --------------------
     - name: Check build output
       run: ls -R dist_nasb
-
-    # -------------------- Clean old folder on VPS --------------------
-    - name: Clean target folder on VPS
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        password: ${{ secrets.VPS_PASS }}
-        script: |
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            sudo rm -rf /var/www/timedari.ir/ssr/*
-          else
-            sudo rm -rf /var/www/dev-timedari-frontend/ssr/*
-          fi
 
     # -------------------- Deploy built files to VPS --------------------
     - name: Deploy built files to VPS
@@ -57,29 +43,12 @@ jobs:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASS }}
-        source: dist_nasb/*   # فقط محتویات داخل dist_nasb
+        source: "dist_nasb/*"
         target: ${{ github.ref == 'refs/heads/main' && '/var/www/timedari.ir/ssr' || '/var/www/dev-timedari-frontend/ssr' }}
+        strip_components: 1
 
-    # -------------------- Set permissions on VPS --------------------
-    - name: Set permissions
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        password: ${{ secrets.VPS_PASS }}
-        script: |
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            TARGET=/var/www/timedari.ir/ssr
-            APP_NAME=timedari-ssr
-          else
-            TARGET=/var/www/dev-timedari-frontend/ssr
-            APP_NAME=dev-timedari-ssr
-          fi
-          sudo chown -R www-data:www-data $TARGET
-          sudo chmod -R 755 $TARGET
-
-    # -------------------- Restart SSR with PM2 --------------------
-    - name: Restart SSR with PM2
+    # -------------------- Install dependencies and restart on VPS --------------------
+    - name: Install dependencies and restart SSR
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.VPS_HOST }}
@@ -93,15 +62,18 @@ jobs:
             APP_DIR=/var/www/dev-timedari-frontend/ssr
             APP_NAME=dev-timedari-ssr
           fi
+          
           cd $APP_DIR
-          # Install dependencies if node_modules missing
-          if [ ! -d "node_modules" ]; then
-            npm install
-          fi
-          # Restart or start with PM2
-          if pm2 list | grep -q $APP_NAME; then
-            pm2 restart $APP_NAME
-          else
-            pm2 start server/main.server.mjs --name $APP_NAME
-          fi
+          
+          # نصب dependencies
+          npm install --production
+          
+          # تنظیم مجوزها
+          sudo chown -R www-data:www-data $APP_DIR
+          sudo chmod -R 755 $APP_DIR
+          
+          # راه‌اندازی مجدد برنامه با PM2
+          pm2 delete $APP_NAME 2>/dev/null || true
+          pm2 start server/main.server.mjs --name $APP_NAME --time
           pm2 save
+          pm2 startup
