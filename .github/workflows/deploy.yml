@@ -24,17 +24,18 @@ jobs:
       run: npm install
 
     # -------------------- Build Angular SSR --------------------
-    - name: Build Angular app
+    - name: Build Angular SSR
       run: |
+        OUTPUT_DIR=dist_ssr
         if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-          npm run build -- --configuration=production --output-path=dist_nasb --delete-output-path --no-prerender
+          npm run build -- --configuration=production --output-path=$OUTPUT_DIR --delete-output-path --no-prerender
         else
-          npm run build -- --configuration=development --output-path=dist_nasb --delete-output-path --no-prerender
+          npm run build -- --configuration=development --output-path=$OUTPUT_DIR --delete-output-path --no-prerender
         fi
 
     # -------------------- Check build output --------------------
     - name: Check build output
-      run: ls -R dist_nasb
+      run: ls -R dist_ssr
 
     # -------------------- Clean old folder on VPS --------------------
     - name: Clean target folder on VPS
@@ -44,11 +45,8 @@ jobs:
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASS }}
         script: |
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            sudo rm -rf /var/www/timedari.ir/ssr
-          else
-            sudo rm -rf /var/www/dev-timedari-frontend/ssr
-          fi
+          TARGET=$([ "${{ github.ref }}" == "refs/heads/main" ] && echo "/var/www/timedari.ir/ssr" || echo "/var/www/dev-timedari-frontend/ssr")
+          sudo rm -rf $TARGET/*
 
     # -------------------- Deploy built files to VPS --------------------
     - name: Deploy built files to VPS
@@ -57,8 +55,8 @@ jobs:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASS }}
-        source: dist_nasb/
-        target: ${{ github.ref == 'refs/heads/main' && '/var/www/timedari.ir/ssr' || '/var/www/dev-timedari-frontend/ssr' }}
+        source: dist_ssr/*
+        target: $([ "${{ github.ref }}" == "refs/heads/main" ] && echo "/var/www/timedari.ir/ssr" || echo "/var/www/dev-timedari-frontend/ssr")
 
     # -------------------- Set permissions on VPS --------------------
     - name: Set permissions
@@ -68,13 +66,7 @@ jobs:
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASS }}
         script: |
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            TARGET=/var/www/timedari.ir/ssr
-            APP_NAME=timedari-ssr
-          else
-            TARGET=/var/www/dev-timedari-frontend/ssr
-            APP_NAME=dev-timedari-ssr
-          fi
+          TARGET=$([ "${{ github.ref }}" == "refs/heads/main" ] && echo "/var/www/timedari.ir/ssr" || echo "/var/www/dev-timedari-frontend/ssr")
           sudo chown -R www-data:www-data $TARGET
           sudo chmod -R 755 $TARGET
 
@@ -86,19 +78,14 @@ jobs:
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASS }}
         script: |
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            APP_DIR=/var/www/timedari.ir/ssr
-            APP_NAME=timedari-ssr
-          else
-            APP_DIR=/var/www/dev-timedari-frontend/ssr
-            APP_NAME=dev-timedari-ssr
-          fi
+          APP_DIR=$([ "${{ github.ref }}" == "refs/heads/main" ] && echo "/var/www/timedari.ir/ssr" || echo "/var/www/dev-timedari-frontend/ssr")
+          APP_NAME=$([ "${{ github.ref }}" == "refs/heads/main" ] && echo "timedari-ssr" || echo "dev-timedari-ssr")
           cd $APP_DIR
-          # Install dependencies if node_modules missing
+          # نصب dependencies در صورت نبود node_modules
           if [ ! -d "node_modules" ]; then
             npm install
           fi
-          # Restart or start with PM2
+          # راه‌اندازی یا ری‌استارت PM2
           if pm2 list | grep -q $APP_NAME; then
             pm2 restart $APP_NAME
           else
