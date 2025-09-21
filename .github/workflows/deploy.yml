@@ -61,9 +61,13 @@ jobs:
             TARGET_DIR="/var/www/dev-timedari-frontend/ssr"
           fi
           
-          # پاکسازی پوشه مقصد
+          # پاکسازی پوشه مقصد و متوقف کردن سرور قبلی
           sudo rm -rf $TARGET_DIR/*
           sudo mkdir -p $TARGET_DIR
+          
+          # مطمئن شویم هیچ سرور Node.js قبلی در حال اجرا نیست
+          pkill -f "node.*server\.mjs" || true
+          sleep 2
 
     # -------------------- Deploy files to VPS --------------------
     - name: Deploy files to VPS
@@ -109,17 +113,25 @@ jobs:
           sudo chown -R www-data:www-data $APP_DIR
           sudo chmod -R 755 $APP_DIR
           
-          # متوقف کردن برنامه قبلی اگر وجود دارد
-          echo "Restarting application..."
-          pm2 delete $APP_NAME 2>/dev/null || true
+          # مطمئن شویم هیچ سرور قبلی در حال اجرا نیست
+          echo "Stopping any running Node.js servers..."
+          pkill -f "node.*server\.mjs" || true
+          sleep 2
           
-          # راه‌اندازی برنامه با working directory صحیح
-          pm2 start server/server.mjs --name $APP_NAME --cwd $APP_DIR --time
+          # راه‌اندازی برنامه با nohup برای اطمینان
+          echo "Starting application with nohup..."
+          nohup node server/server.mjs > /var/log/nodejs.log 2>&1 &
           
-          # ذخیره configuration PM2
-          pm2 save --force
+          # صبر کردن تا سرور کامل بالا بیاید
+          sleep 5
           
-          # تنظیم startup برای PM2
-          pm2 startup 2>/dev/null || true
+          # تست connection
+          echo "Testing connection..."
+          if curl -s http://localhost:4000 > /dev/null; then
+            echo "✅ Server is running successfully!"
+          else
+            echo "❌ Server failed to start. Check /var/log/nodejs.log for details."
+            exit 1
+          fi
           
           echo "Deployment completed successfully!"
