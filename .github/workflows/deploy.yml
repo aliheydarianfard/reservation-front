@@ -39,19 +39,13 @@ jobs:
     # -------------------- Prepare deployment package --------------------
     - name: Prepare deployment package
       run: |
-        # ایجاد پوشه ای برای استقرار
-        mkdir -p deploy_package
-        
-        # کپی فایل‌های build شده
-        cp -r dist_nasb/* deploy_package/
-        
-        # کپی فایل‌های ضروری برای اجرای سرور
-        cp package.json deploy_package/
-        cp package-lock.json deploy_package/ 2>/dev/null || true
+        # کپی فایل‌های ضروری برای اجرای سرور به پوشه dist_nasb
+        cp package.json dist_nasb/
+        cp package-lock.json dist_nasb/ 2>/dev/null || true
         
         # نمایش محتوای پکیج
         echo "Deployment package contents:"
-        ls -la deploy_package/
+        ls -la dist_nasb/
 
     # -------------------- Clean old folder on VPS --------------------
     - name: Clean target folder on VPS
@@ -78,11 +72,11 @@ jobs:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         password: ${{ secrets.VPS_PASS }}
-        source: "deploy_package/*"
+        source: "dist_nasb/*"
         target: ${{ github.ref == 'refs/heads/main' && '/var/www/timedari.ir/ssr' || '/var/www/dev-timedari-frontend/ssr' }}
         strip_components: 0
 
-# -------------------- Install dependencies and restart on VPS --------------------
+    # -------------------- Install dependencies and restart on VPS --------------------
     - name: Install dependencies and restart SSR
       uses: appleboy/ssh-action@master
       with:
@@ -113,8 +107,7 @@ jobs:
           echo "Restarting application..."
           pm2 delete $APP_NAME 2>/dev/null || true
           
-          # راه‌اندازی برنامه - اینجا خطا دارید!
-          # باید از server/server.mjs استفاده کنید نه server/main.server.mjs
+          # راه‌اندازی برنامه
           pm2 start server/server.mjs --name $APP_NAME --time
           
           # ذخیره و فعال کردن PM2
