@@ -76,50 +76,50 @@ jobs:
         target: ${{ github.ref == 'refs/heads/main' && '/var/www/timedari.ir/ssr' || '/var/www/dev-timedari-frontend/ssr' }}
         strip_components: 0
 
-# -------------------- Install dependencies and restart on VPS --------------------
+    # -------------------- Install dependencies and restart on VPS --------------------
     - name: Install dependencies and restart SSR
-    uses: appleboy/ssh-action@master
-    with:
-      host: ${{ secrets.VPS_HOST }}
-      username: ${{ secrets.VPS_USER }}
-      password: ${{ secrets.VPS_PASS }}
-      script: |
-        if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-          APP_DIR="/var/www/timedari.ir/ssr"
-          APP_NAME="timedari-ssr"
-        else
-          APP_DIR="/var/www/dev-timedari-frontend/ssr"
-          APP_NAME="dev-timedari-ssr"
-        fi
-        
-        cd $APP_DIR
-        
-        # انتقال فایل‌ها از dist_nasb به مسیر اصلی
-        echo "Moving files from dist_nasb to root directory..."
-        mv dist_nasb/* .
-        mv dist_nasb/.* 2>/dev/null || true
-        rmdir dist_nasb 2>/dev/null || true
-        
-        # نصب dependencies
-        echo "Installing dependencies..."
-        npm install --production
-        
-        # تنظیم مجوزها
-        echo "Setting permissions..."
-        sudo chown -R www-data:www-data $APP_DIR
-        sudo chmod -R 755 $APP_DIR
-        
-        # متوقف کردن برنامه قبلی اگر وجود دارد
-        echo "Restarting application..."
-        pm2 delete $APP_NAME 2>/dev/null || true
-        
-        # راه‌اندازی برنامه با working directory صحیح
-        pm2 start server/server.mjs --name $APP_NAME --cwd $APP_DIR --time
-        
-        # ذخیره configuration PM2
-        pm2 save --force
-        
-        # تنظیم startup برای PM2
-        pm2 startup 2>/dev/null || true
-        
-        echo "Deployment completed successfully!"
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        password: ${{ secrets.VPS_PASS }}
+        script: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            APP_DIR="/var/www/timedari.ir/ssr"
+            APP_NAME="timedari-ssr"
+          else
+            APP_DIR="/var/www/dev-timedari-frontend/ssr"
+            APP_NAME="dev-timedari-ssr"
+          fi
+          
+          cd $APP_DIR
+          
+          # انتقال فایل‌ها از dist_nasb به مسیر اصلی
+          echo "Moving files from dist_nasb to root directory..."
+          mv dist_nasb/* .
+          mv dist_nasb/.* 2>/dev/null || true
+          rmdir dist_nasb 2>/dev/null || true
+          
+          # نصب dependencies
+          echo "Installing dependencies..."
+          npm install --production
+          
+          # تنظیم مجوزها
+          echo "Setting permissions..."
+          sudo chown -R www-data:www-data $APP_DIR
+          sudo chmod -R 755 $APP_DIR
+          
+          # متوقف کردن برنامه قبلی اگر وجود دارد
+          echo "Restarting application..."
+          pm2 delete $APP_NAME 2>/dev/null || true
+          
+          # راه‌اندازی برنامه با working directory صحیح
+          pm2 start server/server.mjs --name $APP_NAME --cwd $APP_DIR --time
+          
+          # ذخیره configuration PM2
+          pm2 save --force
+          
+          # تنظیم startup برای PM2
+          pm2 startup 2>/dev/null || true
+          
+          echo "Deployment completed successfully!"
