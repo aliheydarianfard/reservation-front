@@ -94,6 +94,12 @@ jobs:
           
           cd $APP_DIR
           
+          # انتقال فایل‌ها از dist_nasb به مسیر اصلی
+          echo "Moving files from dist_nasb to root directory..."
+          mv dist_nasb/* .
+          mv dist_nasb/.* 2>/dev/null || true
+          rmdir dist_nasb 2>/dev/null || true
+          
           # نصب dependencies
           echo "Installing dependencies..."
           npm install --production
@@ -107,7 +113,7 @@ jobs:
           echo "Restarting application..."
           pm2 delete $APP_NAME 2>/dev/null || true
           
-          # راه‌اندازی برنامه - استفاده از force flag برای اطمینان
+          # راه‌اندازی برنامه
           pm2 start server/server.mjs --name $APP_NAME --time -f
           
           # ذخیره و فعال کردن PM2
