@@ -1,10 +1,3 @@
 <h2>🏠 Home Page</h2>
 <p>این صفحه با SSR رندر شده.</p>
 <a routerLink="/about">برو به صفحه About</a>
-
-<h2>لیست کسب‌وکارها</h2>
-<ul>
-  <li *ngFor="let b of businesses">
-    <strong>{{ b.name }}</strong> - {{ b.address.city }}, {{ b.address.street }}
-  </li>
-</ul>
