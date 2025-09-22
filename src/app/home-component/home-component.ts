@@ -12,7 +12,7 @@ import { RouterLink } from '@angular/router';
 export class HomeComponent {
 
 
-  constructor(private http: HttpClient) { }
+  constructor() { }
 
 
 }
