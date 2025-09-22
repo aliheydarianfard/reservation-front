@@ -28,7 +28,8 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.http.get<Business[]>('dev.api.timedari.ir/api/Business/all')
+    this.http.get<Business[]>('https://dev.api.timedari.ir/api/Business/all')
+
       .subscribe({
         next: (data) => this.businesses = data,
         error: (err) => console.error('API error:', err)
