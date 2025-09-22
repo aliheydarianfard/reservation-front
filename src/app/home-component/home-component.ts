@@ -1,20 +1,18 @@
 // home-component.ts
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-
 
 
 @Component({
   selector: 'app-home-component',
   imports: [RouterLink],
   templateUrl: './home-component.html',
-  styleUrls: ['./home-component.scss']
+  styleUrl: './home-component.scss'
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent {
 
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
 
 }
