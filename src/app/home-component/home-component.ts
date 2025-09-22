@@ -14,6 +14,17 @@ export interface Business {
     postalCode: string;
   };
 }
+export interface City {
+  id: string;
+  name: string;
+}
+
+export interface Province {
+  id: string;
+  name: string;
+  cities: City[];
+}
+
 @Component({
   selector: 'app-home-component',
   standalone: true,
@@ -21,18 +32,38 @@ export interface Business {
   templateUrl: './home-component.html',
   styleUrls: ['./home-component.scss']
 })
+
 export class HomeComponent implements OnInit {
-  businesses: Business[] = [];
+  provinces: Province[] = [];
+ businesses: Business[] = [];
 
   constructor(private http: HttpClient) {}
 
-  ngOnInit(): void {
+ loadTimeBusiness: number | null = null;
+loadTimeProvince: number | null = null;
 
-    this.http.get<Business[]>('https://dev.api.timedari.ir/api/Business/all')
+ngOnInit(): void {
+  const startBusiness = performance.now();
+  this.http.get<Business[]>('https://dev.api.timedari.ir/api/Business/all')
+    .subscribe({
+      next: (data) => {
+        this.businesses = data;
+        const endBusiness = performance.now();
+        this.loadTimeBusiness = Math.round(endBusiness - startBusiness);
+      },
+      error: (err) => console.error('API error:', err)
+    });
 
-      .subscribe({
-        next: (data) => this.businesses = data,
-        error: (err) => console.error('API error:', err)
-      });
-  }
+  const startProvince = performance.now();
+  this.http.get<Province[]>('https://dev.api.timedari.ir/api/Locations/all-with-cities')
+    .subscribe({
+      next: (data) => {
+        this.provinces = data;
+        const endProvince = performance.now();
+        this.loadTimeProvince = Math.round(endProvince - startProvince);
+      },
+      error: (err) => console.error('API error:', err)
+    });
+}
+
 }
