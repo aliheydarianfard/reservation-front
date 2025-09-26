@@ -5,12 +5,12 @@ export const routes: Routes = [
     {
     path: 'auth',
     loadChildren: () =>
-      import('./auth/auth.module').then(m => m.AuthModule)
+      import('./features/auth/auth.module').then(m => m.AuthModule)
   },
     {
     path: '',
     loadChildren: () =>
-      import('./business/business-module').then(m => m.BusinessModule)
+      import('./features/business/business.module').then(m => m.BusinessModule)
   },
   { path: '**', redirectTo: '' }
 ];

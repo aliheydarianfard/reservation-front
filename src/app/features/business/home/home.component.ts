@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { CommonModule, isPlatformBrowser, isPlatformServer } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 export interface Business {
   name: string;
@@ -28,8 +28,8 @@ export interface Province {
   selector: 'app-home-component',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './home-component.html',
-  styleUrls: ['./home-component.scss'],
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
   provinces: Province[] = [];
