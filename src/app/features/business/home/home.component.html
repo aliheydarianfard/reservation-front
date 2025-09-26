@@ -1,48 +1,48 @@
-
-
-<div class="content-wrapper">
-
-  <div class="bg-gradient-to-r from-blue-500 to-purple-600 min-h-screen">
-  <div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold text-white text-center mb-8">
+<div class="bg-gradient-to-r from-blue-500 to-purple-600 min-h-screen py-12">
+  <div class="container mx-auto px-4">
+    <!-- Header -->
+    <h1 class="text-4xl md:text-5xl font-bold text-white text-center mb-12">
       Welcome to Angular + Tailwind
     </h1>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="bg-white rounded-lg shadow-lg p-6">
+
+    <!-- کارت نمونه -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+      <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">Card Title</h2>
         <p class="text-gray-600">This is a sample card using Tailwind CSS</p>
-        <button class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+        <button
+          class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors duration-300"
+        >
           Click Me
         </button>
       </div>
-    </div>
-  </div>
-</div>
-  <!-- لیست کسب‌وکارها -->
-  <div class="business-list">
-    <h2>لیست کسب‌وکارها</h2>
-    <div *ngFor="let b of businesses" class="business-card">
-      <h3>{{ b.name }}</h3>
-      <p>دسته‌بندی: {{ b.categoryName }}</p>
-      <p>آدرس: {{ b.address.fullAddress }}</p>
-      <p>شهر: {{ b.address.cityName }} - استان: {{ b.address.provinceName }}</p>
-      <p>کد پستی: {{ b.address.postalCode }}</p>
-    </div>
-  </div>
 
-  <!-- درخت استان‌ها و شهرها -->
-  <div class="tree">
-    <h2>📍 استان‌ها و شهرها</h2>
-    <ul>
-      <li *ngFor="let province of provinces">
-        <div class="province-name">{{ province.name }}</div>
-        <ul>
-          <li *ngFor="let city of province.cities" class="city-name">
-            🏙️ {{ city.name }}
-          </li>
-        </ul>
-      </li>
-    </ul>
+      <!-- اضافه کردن کارت‌های داینامیک کسب‌وکارها -->
+      <div *ngFor="let b of businesses" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+        <h2 class="text-lg font-semibold text-gray-800 mb-2">{{ b.name }}</h2>
+        <p class="text-gray-600 mb-1">دسته‌بندی: {{ b.categoryName }}</p>
+        <p class="text-gray-600 mb-1">آدرس: {{ b.address.fullAddress }}</p>
+        <p class="text-gray-600 mb-1">🏙️ شهر: {{ b.address.cityName }} - استان: {{ b.address.provinceName }}</p>
+        <p class="text-gray-600 mb-2">کد پستی: {{ b.address.postalCode }}</p>
+        <button class="mt-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-1 rounded transition-colors duration-300">
+          مشاهده جزئیات
+        </button>
+      </div>
+    </div>
+
+    <!-- درخت استان‌ها و شهرها -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-4">📍 استان‌ها و شهرها</h2>
+      <ul class="space-y-2">
+        <li *ngFor="let province of provinces" class="border-l-4 border-blue-500 pl-3">
+          <div class="text-gray-800 font-semibold">{{ province.name }}</div>
+          <ul class="pl-4 mt-1 space-y-1">
+            <li *ngFor="let city of province.cities" class="text-gray-600 flex items-center">
+              <span class="mr-2">🏙️</span>{{ city.name }}
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
   </div>
 </div>
