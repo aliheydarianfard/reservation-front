@@ -5,7 +5,7 @@ import { User } from '../models/user.model';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private tokenKey = 'token';
-  private userKey = 'user';
+  private userKey = 'userId';
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem(this.tokenKey);
@@ -15,8 +15,9 @@ export class AuthService {
     const data = localStorage.getItem(this.userKey);
     return data ? JSON.parse(data) : null;
   }
-
-  login(token: string, user: User): void {
+  
+  login(token: string, user: string): void {
+    debugger
     localStorage.setItem(this.tokenKey, token);
     localStorage.setItem(this.userKey, JSON.stringify(user));
   }

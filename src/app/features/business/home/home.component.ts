@@ -43,6 +43,7 @@ export class HomeComponent implements OnInit {
     console.log('event =',item);
      console.log('index =', index);
       this.router.navigate(['/business-page', index], {
+        queryParams: { category: item.categoryName },
     state: { item }
   });
   }
