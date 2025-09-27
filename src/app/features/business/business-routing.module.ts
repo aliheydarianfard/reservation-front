@@ -5,7 +5,7 @@ import { BusinessPageComponent } from './business-page/business-page.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
-  { path: 'business-page', component: BusinessPageComponent }
+  { path: 'business-page/:id', component: BusinessPageComponent }
 ];
 @NgModule({
   imports: [RouterModule.forChild(routes)],

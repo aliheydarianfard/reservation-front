@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { BusinessService } from '../services/business.service';
 import { Province } from '../models/province.model';
 import { Business } from '../models/business.model';
+import { Router } from '@angular/router';
+
 
 
 @Component({
@@ -19,7 +21,7 @@ export class HomeComponent implements OnInit {
   loadTimeBusiness: number | null = null;
   loadTimeProvince: number | null = null;
 
-  constructor(private businessService: BusinessService) {}
+  constructor(private businessService: BusinessService,private router:Router) {}
 
   ngOnInit(): void {
     const startBusiness = performance.now();
@@ -35,5 +37,13 @@ export class HomeComponent implements OnInit {
       const endProvince = performance.now();
       this.loadTimeProvince = Math.round(endProvince - startProvince);
     });
+  }
+
+  navigation(item:Business,index:number) : void {
+    console.log('event =',item);
+     console.log('index =', index);
+      this.router.navigate(['/business-page', index], {
+    state: { item }
+  });
   }
 }
