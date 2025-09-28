@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
   selector: 'app-login-component',
   standalone: false,
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
 })
 export class LoginComponent {
   phoneNumber = '';
@@ -18,7 +18,6 @@ export class LoginComponent {
   constructor(private auth: AuthService, private router: Router) {}
 
   login() {
-    debugger
     this.errorMessage = '';
 
     const loginObs = this.useOtp
@@ -33,18 +32,21 @@ export class LoginComponent {
       error: (err) => {
         this.errorMessage = this.useOtp ? 'کد OTP نامعتبر' : 'رمز عبور نامعتبر';
         console.error(err);
-      }
+      },
     });
   }
 
   requestOtp() {
     const deviceId = 'browser-' + Math.random().toString(36).substr(2, 9);
     this.auth.requestOtp(this.phoneNumber, deviceId).subscribe({
-      next: () => alert('کد OTP ارسال شد!'),
+      next: (res) => {
+        this.code = res.code;
+        alert('کد OTP ارسال شد!');
+      },
       error: (err) => {
         alert('خطا در ارسال OTP');
         console.error(err);
-      }
+      },
     });
   }
 }

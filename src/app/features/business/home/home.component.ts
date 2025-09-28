@@ -1,11 +1,9 @@
-import { Component,OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BusinessService } from '../services/business.service';
 import { Province } from '../models/province.model';
 import { Business } from '../models/business.model';
 import { Router } from '@angular/router';
-
-
 
 @Component({
   selector: 'app-home-component',
@@ -20,31 +18,30 @@ export class HomeComponent implements OnInit {
 
   loadTimeBusiness: number | null = null;
   loadTimeProvince: number | null = null;
+  userName: string | null = null;
 
-  constructor(private businessService: BusinessService,private router:Router) {}
+  constructor(private businessService: BusinessService, private router: Router) {}
 
   ngOnInit(): void {
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+      const parsed = JSON.parse(currentUser);
+      this.userName = parsed.unique_name; 
+    }
     const startBusiness = performance.now();
-    this.businessService.getBusinesses().subscribe(data => {
+    this.businessService.getBusinesses().subscribe((data) => {
       this.businesses = data;
       const endBusiness = performance.now();
       this.loadTimeBusiness = Math.round(endBusiness - startBusiness);
     });
 
-    const startProvince = performance.now();
-    this.businessService.getProvinces().subscribe(data => {
-      this.provinces = data;
-      const endProvince = performance.now();
-      this.loadTimeProvince = Math.round(endProvince - startProvince);
-    });
+    
   }
 
-  navigation(item:Business,index:number) : void {
-    console.log('event =',item);
-     console.log('index =', index);
-      this.router.navigate(['/business-page', index], {
-        queryParams: { category: item.categoryName },
-    state: { item }
-  });
+  navigation(item: Business): void {
+    this.router.navigate(['/business-page', item.id], {
+      queryParams: { category: item.categoryName },
+      state: { item },
+    });
   }
 }

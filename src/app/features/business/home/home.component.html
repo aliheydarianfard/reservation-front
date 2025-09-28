@@ -4,10 +4,24 @@
     <h1 class="text-4xl md:text-5xl font-bold text-white text-center mb-12">
       Welcome to Angular + Tailwind
     </h1>
+    @if(userName){
+
+      <h2>
+        <div class="p-6 text-center">
+          <h1 class="text-2xl font-bold">خوش آمدی، {{ userName || 'کاربر عزیز' }} 🎉</h1>
+        </div>
+      </h2>
+    }
+    <a
+      href="/auth/login"
+      class="mt-4 px-6 py-2 bg-white text-purple-600 font-semibold rounded-xl shadow hover:bg-gray-100 transition"
+    >
+      ورود
+    </a>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
       <!-- اضافه کردن کارت‌های داینامیک کسب‌وکارها -->
-      @for (b of businesses; track $index; let i = $index) {
+      @for (b of businesses; track b.id; ) {
       <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
         <h2 class="text-lg font-semibold text-gray-800 mb-2">{{ b.name }}</h2>
         <p class="text-gray-600 mb-1">دسته‌بندی: {{ b.categoryName }}</p>
@@ -17,7 +31,7 @@
         </p>
         <p class="text-gray-600 mb-2">کد پستی: {{ b.address.postalCode }}</p>
         <button
-          (click)="navigation(b, i)"
+          (click)="navigation(b)"
           class="mt-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-1 rounded transition-colors duration-300"
         >
           مشاهده جزئیات
@@ -26,27 +40,5 @@
       }
     </div>
 
-    <!-- درخت استان‌ها و شهرها -->
-    <div class="bg-white rounded-lg shadow-lg p-6">
-      <h2 class="text-xl font-bold text-gray-800 mb-4">📍 استان‌ها و شهرها</h2>
-
-      <!-- Container scrollable -->
-      <div class="max-h-96 overflow-y-auto pr-2">
-        <!-- max-h-96 حدود 24rem -->
-        @for (province of provinces; track $index; let i = $index) {
-        <div class="border-l-4 border-blue-500 pl-3 mb-3">
-          <div class="text-gray-800 font-semibold mb-1">{{ province.name }}</div>
-
-          <div class="pl-4 space-y-1">
-            @for (city of province.cities; track $index; let j = $index) {
-            <div class="text-gray-600 flex items-center">
-              <span class="ml-2">🏙️</span>{{ city.name }}
-            </div>
-            }
-          </div>
-        </div>
-        }
-      </div>
-    </div>
   </div>
 </div>

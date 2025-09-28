@@ -5,6 +5,7 @@ import { tap } from 'rxjs/operators';
 import { isPlatformServer } from '@angular/common';
 import { AuthService as CoreAuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/user.model';
+import { Router } from '@angular/router';
 
 export interface LoginResponse {
   userId: string;
@@ -24,7 +25,8 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private coreAuth: CoreAuthService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private router: Router
   ) {}
 
   // درخواست OTP
@@ -58,7 +60,8 @@ export class AuthService {
     debugger
     console.log('Saving user in localStorage', res);
     if (!isPlatformServer(this.platformId)) {
-      this.coreAuth.login(res.token, res.userId);
+      this.coreAuth.login(res); 
+      this.router.navigate(['/']);
     }
   }
 

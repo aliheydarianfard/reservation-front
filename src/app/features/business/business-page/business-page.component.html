@@ -2,40 +2,40 @@
   <div class="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-8">
     <!-- Header -->
     <h1 class="text-3xl font-bold text-gray-800 mb-6">
-      🏢 {{ item.name }}
+      🏢 {{ business.name }}
     </h1>
 
     <!-- Info Section -->
     <div class="space-y-4">
       <div>
         <h2 class="text-lg font-semibold text-gray-700">دسته‌بندی</h2>
-        <p class="text-gray-600">{{ item.categoryName }}</p>
+        <p class="text-gray-600">{{ business.categoryName }}</p>
       </div>
 
       <div>
         <h2 class="text-lg font-semibold text-gray-700">کد دسته‌بندی</h2>
-        <p class="text-gray-600">{{ item.businessCategory }}</p>
+        <p class="text-gray-600">{{ business.businessCategory }}</p>
       </div>
 
       <div>
         <h2 class="text-lg font-semibold text-gray-700">آدرس کامل</h2>
-        <p class="text-gray-600">{{ item.address.fullAddress }}</p>
+        <p class="text-gray-600">{{ business.address.fullAddress }}</p>
       </div>
 
       <div class="grid grid-cols-2 gap-4">
         <div>
           <h2 class="text-lg font-semibold text-gray-700">استان</h2>
-          <p class="text-gray-600">{{ item.address.provinceName }}</p>
+          <p class="text-gray-600">{{ business.address.provinceName }}</p>
         </div>
         <div>
           <h2 class="text-lg font-semibold text-gray-700">شهر</h2>
-          <p class="text-gray-600">{{ item.address.cityName }}</p>
+          <p class="text-gray-600">{{ business.address.cityName }}</p>
         </div>
       </div>
 
       <div>
         <h2 class="text-lg font-semibold text-gray-700">کد پستی</h2>
-        <p class="text-gray-600">{{ item.address.postalCode }}</p>
+        <p class="text-gray-600">{{ business.address.postalCode }}</p>
       </div>
     </div>
 

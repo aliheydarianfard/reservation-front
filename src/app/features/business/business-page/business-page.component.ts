@@ -1,16 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Business } from '../models/business.model';
+import { BusinessService } from '../services/business.service';
 
 @Component({
   selector: 'app-business-page-component',
-  imports: [],
+  standalone: true,
   templateUrl: './business-page.component.html',
-  styleUrl: './business-page.component.scss'
+  styleUrls: ['./business-page.component.scss']
 })
 export class BusinessPageComponent implements OnInit {
-  id: number | null = null;
-  item: Business = {  name: '',
+  id: string | null = null;
+  business: Business = {  name: '',
+  id:'',
   categoryName: '',
   businessCategory: 0,
   address: {
@@ -20,17 +22,25 @@ export class BusinessPageComponent implements OnInit {
     postalCode: '',
   }};
 
-  constructor(private route: ActivatedRoute,private router: Router) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private businessService: BusinessService
+  ) {}
 
   ngOnInit(): void {
-    // گرفتن index از URL
-    this.id = Number(this.route.snapshot.paramMap.get('id'));
+    this.id = this.route.snapshot.paramMap.get('id');
 
-    // گرفتن item از state
-    this.item = history.state.item;
+
+     if (this.id) {
+      this.businessService.getBusinessById(this.id).subscribe(data => {
+        if(data)
+        this.business = data;
+      });
+    }
   }
 
-  goBack() {
-  this.router.navigate(['/']);
-}
+  goBack(): void {
+    this.router.navigate(['/']);
+  }
 }
